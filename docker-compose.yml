@@ -1,0 +1,49 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: hr-ai-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: hr_ai
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./prisma/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d hr_ai"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: hr-ai-app
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/hr_ai?schema=public
+      DIRECT_URL: postgresql://postgres:postgres@db:5432/hr_ai?schema=public
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      JWT_SECRET: ${JWT_SECRET:-replace-with-32-byte-random-secret}
+      APP_URL: http://localhost:3000
+      DINGTALK_ROBOT_WEBHOOK: ${DINGTALK_ROBOT_WEBHOOK:-}
+      DINGTALK_ROBOT_SECRET: ${DINGTALK_ROBOT_SECRET:-}
+      DINGTALK_WEBHOOK_TOKEN: ${DINGTALK_WEBHOOK_TOKEN:-change-me}
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "3000:3000"
+    volumes:
+      - uploads:/app/uploads
+
+  redis:
+    image: redis:7-alpine
+    container_name: hr-ai-redis
+    ports:
+      - "6379:6379"
+
+volumes:
+  postgres_data:
+  uploads:
