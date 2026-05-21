@@ -1,0 +1,319 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  directUrl  = env("DIRECT_URL")
+  extensions = [vector, pg_trgm]
+}
+
+enum Role {
+  ADMIN
+  HR
+  MANAGER
+  SUPPORT
+  EMPLOYEE
+}
+
+enum ChatStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+  TOOL
+}
+
+enum FileStatus {
+  UPLOADED
+  PROCESSING
+  READY
+  FAILED
+}
+
+enum AgentType {
+  HR_POLICY
+  PAYROLL
+  LEAVE
+  ONBOARDING
+  VISA
+  TRAINING
+  IT_SUPPORT
+  FINANCE
+  ADMIN_SERVICE
+  LEGAL
+  GENERAL
+}
+
+enum SupportDepartment {
+  HR
+  IT
+  FINANCE
+  ADMIN
+  LEGAL
+}
+
+enum TicketStatus {
+  OPEN
+  PENDING
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum KnowledgeVisibility {
+  EMPLOYEE
+  MANAGER
+  HR_ONLY
+  ADMIN_ONLY
+}
+
+enum NotificationChannel {
+  SYSTEM
+  EMAIL
+  DINGTALK
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+enum ReportType {
+  WEEKLY
+  MONTHLY
+}
+
+enum ReportStatus {
+  QUEUED
+  RUNNING
+  READY
+  FAILED
+}
+
+model User {
+  id           String      @id @default(cuid())
+  email        String      @unique
+  name         String
+  passwordHash String
+  role         Role        @default(EMPLOYEE)
+  country      String      @default("CN")
+  department   String?
+  isActive     Boolean     @default(true)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  chats        Chat[]
+  messages     Message[]
+  feedbacks    Feedback[]
+  auditLogs    AuditLog[]
+  requestedTickets SupportTicket[] @relation("RequesterTickets")
+  assignedTickets  SupportTicket[] @relation("AssigneeTickets")
+  ticketMessages   TicketMessage[]
+  notifications    Notification[]
+  dingTalkAccount  DingTalkAccount?
+}
+
+model Chat {
+  id        String     @id @default(cuid())
+  title     String
+  status    ChatStatus @default(ACTIVE)
+  agent     AgentType  @default(GENERAL)
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages  Message[]
+  tickets   SupportTicket[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([userId, updatedAt])
+}
+
+model Message {
+  id        String      @id @default(cuid())
+  role      MessageRole
+  content   String
+  citations Json?
+  metadata  Json?
+  chatId    String
+  chat      Chat        @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  userId    String?
+  user      User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  feedback  Feedback?
+  createdAt DateTime    @default(now())
+
+  @@index([chatId, createdAt])
+}
+
+model KnowledgeFile {
+  id          String           @id @default(cuid())
+  name        String
+  originalName String
+  mimeType    String
+  size        Int
+  path        String
+  category    String           @default("General")
+  tags        String[]         @default([])
+  country     String           @default("GLOBAL")
+  department  SupportDepartment @default(HR)
+  visibility  KnowledgeVisibility @default(EMPLOYEE)
+  status      FileStatus        @default(UPLOADED)
+  checksum    String?
+  uploadedBy  String?
+  chunks      KnowledgeChunk[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([department, category, country])
+}
+
+model KnowledgeChunk {
+  id        String        @id @default(cuid())
+  content   String
+  chunkIndex Int
+  tokenCount Int
+  metadata  Json?
+  fileId    String
+  file      KnowledgeFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  embedding Embedding?
+  createdAt DateTime      @default(now())
+
+  @@index([fileId, chunkIndex])
+}
+
+model Embedding {
+  id        String     @id @default(cuid())
+  model     String
+  // Prisma currently maps pgvector through Unsupported; raw SQL handles similarity.
+  vector    Unsupported("vector(3072)")
+  chunkId   String     @unique
+  chunk     KnowledgeChunk @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+  createdAt DateTime   @default(now())
+}
+
+model Prompt {
+  id          String    @id @default(cuid())
+  key         String    @unique
+  name        String
+  content     String
+  role        AgentType @default(GENERAL)
+  country     String    @default("GLOBAL")
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Feedback {
+  id        String   @id @default(cuid())
+  rating    Int
+  stars     Int?
+  comment   String?
+  messageId String   @unique
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model SupportTicket {
+  id          String            @id @default(cuid())
+  title       String
+  description String
+  status      TicketStatus      @default(OPEN)
+  priority    TicketPriority    @default(MEDIUM)
+  department  SupportDepartment
+  slaDueAt     DateTime
+  resolvedAt   DateTime?
+  chatId       String?
+  chat         Chat?            @relation(fields: [chatId], references: [id], onDelete: SetNull)
+  requesterId  String
+  requester    User             @relation("RequesterTickets", fields: [requesterId], references: [id], onDelete: Cascade)
+  assigneeId   String?
+  assignee     User?            @relation("AssigneeTickets", fields: [assigneeId], references: [id], onDelete: SetNull)
+  messages     TicketMessage[]
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@index([department, status, slaDueAt])
+  @@index([requesterId, createdAt])
+}
+
+model TicketMessage {
+  id        String        @id @default(cuid())
+  content   String
+  isInternal Boolean      @default(false)
+  ticketId  String
+  ticket    SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  createdAt DateTime      @default(now())
+}
+
+model Notification {
+  id        String              @id @default(cuid())
+  channel   NotificationChannel
+  status    NotificationStatus  @default(PENDING)
+  title     String
+  content   String
+  target    String?
+  metadata  Json?
+  userId    String?
+  user      User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt DateTime            @default(now())
+  sentAt    DateTime?
+
+  @@index([channel, status, createdAt])
+}
+
+model DingTalkAccount {
+  id            String   @id @default(cuid())
+  unionId       String   @unique
+  openId        String?
+  staffId       String?
+  corpId        String?
+  nick          String?
+  avatar        String?
+  userId        String?  @unique
+  user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model AiReport {
+  id        String       @id @default(cuid())
+  type      ReportType
+  status    ReportStatus @default(QUEUED)
+  title     String
+  summary   String?
+  metrics   Json?
+  fileUrl   String?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  entity    String
+  entityId  String?
+  metadata  Json?
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@index([entity, createdAt])
+}
