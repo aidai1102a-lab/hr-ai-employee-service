@@ -2,16 +2,5 @@
   "framework": "nextjs",
   "buildCommand": "npm run build",
   "installCommand": "npm install --legacy-peer-deps",
-  "outputDirectory": ".next",
-  "functions": {
-    "app/api/chat/route.ts": {
-      "maxDuration": 60
-    },
-    "app/api/knowledge/route.ts": {
-      "maxDuration": 60
-    },
-    "app/api/dingtalk/webhook/route.ts": {
-      "maxDuration": 60
-    }
-  }
+  "outputDirectory": ".next"
 }
