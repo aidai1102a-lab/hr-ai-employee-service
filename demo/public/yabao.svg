@@ -1,0 +1,38 @@
+<svg width="420" height="320" viewBox="0 0 420 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="420" height="320" rx="28" fill="url(#bg)"/>
+  <circle cx="318" cy="66" r="42" fill="white" opacity=".55"/>
+  <circle cx="88" cy="250" r="58" fill="#00C985" opacity=".12"/>
+  <rect x="118" y="110" width="184" height="158" rx="50" fill="#FF9CBD"/>
+  <path d="M148 118C134 83 136 52 154 45C172 38 190 67 196 105L148 118Z" fill="#FF9CBD"/>
+  <path d="M272 118C286 83 284 52 266 45C248 38 230 67 224 105L272 118Z" fill="#FF9CBD"/>
+  <path d="M159 120C153 96 155 74 162 69C169 65 180 83 186 108L159 120Z" fill="#FFC1D2"/>
+  <path d="M261 120C267 96 265 74 258 69C251 65 240 83 234 108L261 120Z" fill="#FFC1D2"/>
+  <circle cx="171" cy="166" r="18" fill="#1557FF"/>
+  <circle cx="249" cy="166" r="18" fill="#1557FF"/>
+  <circle cx="165" cy="158" r="6" fill="white" opacity=".8"/>
+  <circle cx="243" cy="158" r="6" fill="white" opacity=".8"/>
+  <ellipse cx="210" cy="188" rx="13" ry="10" fill="#FF7DA8"/>
+  <path d="M184 210C199 225 221 225 236 210" stroke="#8A1F3D" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="132" cy="190" r="15" fill="#FF7DA8" opacity=".72"/>
+  <circle cx="288" cy="190" r="15" fill="#FF7DA8" opacity=".72"/>
+  <path d="M114 149C83 154 62 176 58 207" stroke="#54B7FF" stroke-width="22" stroke-linecap="round"/>
+  <path d="M306 149C337 154 358 176 362 207" stroke="#54B7FF" stroke-width="22" stroke-linecap="round"/>
+  <circle cx="72" cy="207" r="24" fill="#47AFFF"/>
+  <circle cx="348" cy="207" r="24" fill="#47AFFF"/>
+  <path d="M143 254H277C298 254 315 271 315 292V320H105V292C105 271 122 254 143 254Z" fill="#21A9F7"/>
+  <path d="M180 285C198 297 222 297 240 285" stroke="white" stroke-width="8" stroke-linecap="round" opacity=".92"/>
+  <g transform="translate(178 262)">
+    <path d="M8 20C8 13.4 13.4 8 20 8H44C50.6 8 56 13.4 56 20C56 26.6 50.6 32 44 32H20C13.4 32 8 26.6 8 20Z" fill="#05C987"/>
+    <circle cx="8" cy="20" r="8" fill="#05C987"/>
+    <circle cx="56" cy="20" r="8" fill="#1557FF"/>
+    <rect x="22" y="14" width="20" height="12" rx="6" fill="#1557FF"/>
+  </g>
+  <text x="210" y="309" text-anchor="middle" font-family="Arial, 'Microsoft YaHei', sans-serif" font-size="16" font-weight="800" fill="white">PATSNAP</text>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="420" y2="320" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#EAF4FF"/>
+      <stop offset=".55" stop-color="#F5FBFF"/>
+      <stop offset="1" stop-color="#E7FFF5"/>
+    </linearGradient>
+  </defs>
+</svg>
