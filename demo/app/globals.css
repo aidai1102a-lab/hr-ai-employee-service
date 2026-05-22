@@ -62,13 +62,14 @@ a {
 .brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  min-height: 58px;
 }
 
 .brand-image {
-  width: 128px;
-  height: 48px;
+  width: 208px;
+  height: 58px;
   object-fit: contain;
+  object-position: left center;
 }
 
 .brand-text {

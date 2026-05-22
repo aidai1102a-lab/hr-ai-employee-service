@@ -84,10 +84,6 @@ export default function Home() {
       <aside className="sidebar">
         <div className="brand">
           <img className="brand-image" src={logoUrl || "/brand-logo.svg"} alt={`${companyName} logo`} />
-          <div className="brand-text">
-            <strong>{companyName}</strong>
-            <span>Employee AI Service</span>
-          </div>
         </div>
 
         <nav className="nav">
